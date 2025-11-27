@@ -1,7 +1,3 @@
-# Example usage:
-#
-# python select_server.py 3490
-
 import sys
 import socket
 import select
@@ -10,18 +6,20 @@ import select
 
 
 def run_server(port):
+    buffers = {} # map sockets to buffers
     read_set = set()
-    s = socket.socket()
-    s.bind(("localhost", port))
-    s.listen()
-    read_set.add(s)
+    listener = socket.socket()
+    listener.bind(("localhost", port))
+    listener.listen()
+    read_set.add(listener)
     while True:
         ready, _, _ = select.select(read_set, {}, {})
 
         for read_socket in ready:
-            if read_socket == s:
-                client_socket, client_addr = s.accept()
+            if read_socket == listener:
+                client_socket, client_addr = listener.accept()
                 read_set.add(client_socket)
+                buffers[client_socket] = b''
                 print(f"{client_addr}: connected")
             else:
                 data = read_socket.recv(1024)
