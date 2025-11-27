@@ -21,14 +21,37 @@ def run_server(port):
                 buffers[client_socket] = b''
                 print(f"{client_addr}: connected")
             else:
-                data = read_socket.recv(1024)
-                if len(data) == 0:
-                    read_socket.close()
-                    read_set.remove(read_socket)
-                    print(f"{client_addr}: disconnected")
-                else:
-                    data = data.decode('utf-8')
-                    print(data)
+                # while True:
+                #     packet = get_next_word_packet(read_socket, buffers[read_socket])
+                    
+                #     if packet is None:
+                #         break
+
+                #     received_msg = extract_word(word_packet)
+                    data = read_socket.recv(1024)
+                    data = json.loads(data)
+                    
+                    if data['type'] == 'hello':
+                        for client_socket in read_set:
+                            print(client_socket)
+                            if client_socket != listener:
+                                connect_msg = "** someone connected"
+                                connect_msg = connect_msg.encode()
+                                client_socket.sendall(connect_msg)
+
+                    
+
+
+
+
+
+                # if len(data) == 0:
+                #     read_socket.close()
+                #     read_set.remove(read_socket)
+                #     print(f"{client_addr}: disconnected")
+                # else:
+                #     data = data.decode('utf-8')
+                #     print(data)
 
 
 # Sent to all when user joins
@@ -50,10 +73,6 @@ def run_server(port):
 #     "message": "[message]"
 # }
 
-
-#--------------------------------#
-# Do not modify below this line! #
-#--------------------------------#
 
 def usage():
     print("usage: chat_server.py port", file=sys.stderr)

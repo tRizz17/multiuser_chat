@@ -14,15 +14,19 @@ def connect_and_msg(name, host, port, s):
     cmd = read_command(f"{name}> ")
 
 def receive_msgs(s):
-    while True:
-        packet = get_next_word_packet(s)
 
-        if packet is None:
-            break
+    data = s.recv(1024)
+    decoded_data = data.decode()
+    print_message(decoded_data)
+    # while True:
+    #     packet = get_next_word_packet(s)
 
-        received_msg = extract_word(word_packet)
+    #     if packet is None:
+    #         break
 
-        print_message(received_msg)
+    #     received_msg = extract_word(word_packet)
+
+    #     print_message(received_msg)
 
 def main(argv):
     init_windows()
@@ -34,9 +38,8 @@ def main(argv):
     s = socket.socket()
     s.connect((host, port))
 
-    connect_and_msg_thread = threading.Thread(target=connect_and_msg, args=(nickname, host, port, s))
-    receive_thread = threading.Thread(target=receive_msgs , args=s)
-    connect_and_msg_thread.start()
+    connect_and_msg_thread = threading.Thread(target=connect_and_msg, args=(nickname, host, port, s)).start()
+    receive_thread = threading.Thread(target=receive_msgs , args=(s,)).start()
 
 
 

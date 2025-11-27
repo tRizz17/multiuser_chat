@@ -2,7 +2,7 @@ WORD_LEN_SIZE = 2
 DATA_TO_RECV = 1
 
 
-def packet_complete():
+def packet_complete(packet_buffer):
     if len(packet_buffer) > WORD_LEN_SIZE:
         packet_length_int = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], "big")
         if len(packet_buffer) >= packet_length_int + WORD_LEN_SIZE:
@@ -10,7 +10,7 @@ def packet_complete():
     return False
 
 
-def get_next_word_packet(s):
+def get_next_word_packet(s, packet_buffer):
     """
     Return the next word packet from the stream.
 
@@ -21,7 +21,7 @@ def get_next_word_packet(s):
     up.
     """
     while True:
-        if packet_complete():
+        if packet_complete(packet_buffer):
             word_len_int = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], "big")
             packet = packet_buffer[:word_len_int + WORD_LEN_SIZE]
             packet_buffer = packet_buffer[word_len_int + WORD_LEN_SIZE:]
