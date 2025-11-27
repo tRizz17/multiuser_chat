@@ -1,7 +1,5 @@
-import sys
-import socket
-import select
-import json
+import sys, socket, select, json
+from packets import *
 
 # create dictionary to map ip addresses to nicknames
 
@@ -29,10 +27,28 @@ def run_server(port):
                     read_set.remove(read_socket)
                     print(f"{client_addr}: disconnected")
                 else:
-                    print(f"{client_addr} {len(data)}: {data}")
+                    data = data.decode('utf-8')
+                    print(data)
 
 
+# Sent to all when user joins
+# {
+#     "type": "join"
+#     "nick": "[joiner's nickname]"
+# }
 
+# Sent to all when user leaves
+# {
+#     "type": "leave"
+#     "nick": "[leaver's nickname]"
+# }
+
+# Sent to all when user sends msg
+# {
+#     "type": "chat"
+#     "nick": "[sender nickname]"
+#     "message": "[message]"
+# }
 
 
 #--------------------------------#
