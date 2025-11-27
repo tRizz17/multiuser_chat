@@ -1,6 +1,7 @@
 import sys
 import socket
 import select
+import json
 
 # create dictionary to map ip addresses to nicknames
 

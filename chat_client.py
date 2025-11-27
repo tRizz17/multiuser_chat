@@ -1,17 +1,16 @@
-import sys, socket, threading
+import sys, socket, threading, json
 from chatui import init_windows, read_command, print_message, end_windows
-
-CHAT_THREADS = 2
-
 
 
 def usage():
     print("usage: chat_client.py name host port", file=sys.stderr)
 
-def launch_connection(name, host, port):
+def connect_and_msg(name, host, port):
     s = socket.socket()
     s.connect((host, port))
-    cmd = read_command()
+    cmd = read_command(f"{name}> ")
+
+# def receive_msgs()
 
 
 def main(argv):
@@ -21,8 +20,12 @@ def main(argv):
     host = argv[2]
     port = int(argv[3])
 
-    launch_thread = threading.Thread(target=launch_connection, args=(nickname, host, port))
-    launch_thread.start()
+    connect_and_msg_thread = threading.Thread(target=connect_and_msg, args=(nickname, host, port))
+    # receive_thread = threading.Thread(target= , arg= )
+    connect_and_msg_thread.start()
+
+
+
 
 
 if __name__ == "__main__":
