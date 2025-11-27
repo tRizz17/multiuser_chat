@@ -18,15 +18,7 @@ def receive_msgs(s):
     data = s.recv(1024)
     decoded_data = data.decode()
     print_message(decoded_data)
-    # while True:
-    #     packet = get_next_word_packet(s)
 
-    #     if packet is None:
-    #         break
-
-    #     received_msg = extract_word(word_packet)
-
-    #     print_message(received_msg)
 
 def main(argv):
     init_windows()
