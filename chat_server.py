@@ -21,21 +21,29 @@ def run_server(port):
                 buffers[client_socket] = b''
             else:
                     data = read_socket.recv(1024)
-                    data = json.loads(data)
+                    if data == b'':
+                        read_socket.close()
+                        read_set.remove(read_socket)
+                        for client_socket in read_set:
+                            if client_socket != listener:
+                                connect_msg = (f"*** {names[read_socket]} has left the chat").encode()
+                                client_socket.sendall(connect_msg)
+                        
+                    else:
+                        data = json.loads(data)
+                        match data['type']:
+                            case 'hello': ## probably can extract this into function
+                                names[read_socket] = data['nick']
+                                for client_socket in read_set:
+                                    if client_socket != listener:
+                                        connect_msg = (f"*** {names[read_socket]} has joined the chat").encode()
+                                        client_socket.sendall(connect_msg)
 
-                    match data['type']:
-                        case 'hello': ## probably can extract this into function
-                            names[read_socket] = data['nick']
-                            for client_socket in read_set:
-                                if client_socket != listener:
-                                    connect_msg = (f"*** {names[read_socket]} has joined the chat").encode()
-                                    client_socket.sendall(connect_msg)
-
-                        case 'message':
-                            for client_socket in read_set:
-                                if client_socket != listener:
-                                    msg = (f"{names[read_socket]}: {data['message']}").encode()
-                                    client_socket.sendall(msg)
+                            case 'message':
+                                for client_socket in read_set:
+                                    if client_socket != listener:
+                                        msg = (f"{names[read_socket]}: {data['message']}").encode()
+                                        client_socket.sendall(msg)
 
 
 
