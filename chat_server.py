@@ -22,17 +22,17 @@ def run_server(port):
                 buffers[client_socket] = b''
             else:
                     encoded_data = get_next_word_packet(read_socket, buffers[read_socket])
-                    data = extract_msg(encoded_data)
-                    if data == b'':
-                        read_socket.close()
+                    if encoded_data is None:
+                        # read_socket.close()
                         read_set.remove(read_socket)
                         for client_socket in read_set:
                             if client_socket != listener:
-                                connect_msg = (f"*** {names[read_socket]} has left the chat").encode()
-                                client_socket.sendall(connect_msg)
+                                leave_msg = server_json_packet('leave', name=names[read_socket])
+                                client_socket.sendall(leave_msg)
                         
                     else:
-                        data = json.loads(data)
+                        rough_data = extract_msg(encoded_data)
+                        data = json.loads(rough_data)
                         match data['type']:
                             case 'hello':
                                 names[read_socket] = data['nick']

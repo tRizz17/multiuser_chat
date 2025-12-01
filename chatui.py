@@ -31,7 +31,9 @@ def print_message(s):
     print_now(buf)
 
 def end_windows():
-    pass
+    
+    return
+    
 
 def print_now(s):
     print(s, end="", flush=True)

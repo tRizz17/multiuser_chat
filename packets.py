@@ -1,7 +1,7 @@
 import json
 
 MSG_LEN_SIZE = 2
-DATA_TO_RECV = 1
+DATA_TO_RECV = 2
 
 
 def packet_complete(packet_buffer):
@@ -29,13 +29,18 @@ def get_next_word_packet(s, packet_buffer):
             packet_buffer = packet_buffer[word_len_int + MSG_LEN_SIZE:]
             return packet
 
-        data = s.recv(DATA_TO_RECV)
+        try: 
+            data = s.recv(DATA_TO_RECV)
 
-        if len(data) == 0:
-            return None
+            if len(data) == 0 or data is None:
+                return None
 
-        packet_buffer += data
+            packet_buffer += data
 
+        except OSError: 
+
+            return
+            
 
 def extract_msg(packet):
     """
@@ -74,7 +79,7 @@ def server_json_packet(type, message=None, name=None):
     match type:
 
         case 'chat':
-            msg_json = json.dumps({"type": "chat", "nick": f"{name}", "chat": f"{message}"}).encode('utf-8')
+            msg_json = json.dumps({"type": "chat", "nick": f"{name}", "message": f"{message}"}).encode('utf-8')
             msg_json_len = len(msg_json)
             msg_json_len_bytes = msg_json_len.to_bytes(MSG_LEN_SIZE, "big")
             packet = msg_json_len_bytes + msg_json
@@ -88,6 +93,11 @@ def server_json_packet(type, message=None, name=None):
             return packet
 
         case 'leave':
-            pass
+            msg_json = json.dumps({"type": "leave", "nick": f"{name}"}).encode('utf-8')
+            msg_json_len = len(msg_json)
+            msg_json_len_bytes = msg_json_len.to_bytes(MSG_LEN_SIZE, "big")
+            packet = msg_json_len_bytes + msg_json
+            return packet
+            
 
 

@@ -1,4 +1,4 @@
-import sys, socket, threading, json
+import sys, socket, threading, json, re
 from chatui import init_windows, read_command, print_message, end_windows
 from packets import *
 
@@ -14,29 +14,34 @@ def connect_and_msg(name, host, port, s):
     while True:
         cmd = read_command(f"{name}> ")
         stripped_cmd = cmd.lstrip('>')
+        if re.fullmatch(r"^/q$", stripped_cmd):
+            s.close()
+            return
+
         packet = client_json_packet('chat', message=stripped_cmd)
         s.sendall(packet)
 
 def receive_msgs(s):
-
     while True:
         buffer = b''
         encoded_data = get_next_word_packet(s, buffer)
+        if encoded_data is None:
+            return
         data = extract_msg(encoded_data)
         data = json.loads(data)
         match data['type']:
             case 'join':
-                join_msg = f"** {data['nick']} has joined the chat"
+                join_msg = f"*** {data['nick']} has joined the chat"
                 print_message(join_msg)
 
             case 'chat':
-                msg = data['chat']
+                msg = data['message']
                 name_and_msg = f"{data['nick']}: {msg}"
                 print_message(name_and_msg)
 
             case 'leave':
-                pass
-
+                leave_msg = f"*** {data['nick']} has left the chat"
+                print_message(leave_msg)
 
 
 def main(argv):
@@ -51,8 +56,6 @@ def main(argv):
 
     connect_and_msg_thread = threading.Thread(target=connect_and_msg, args=(nickname, host, port, s)).start()
     receive_thread = threading.Thread(target=receive_msgs , args=(s,)).start()
-
-
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
