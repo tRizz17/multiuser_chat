@@ -9,6 +9,7 @@ def run_server(port):
     listener = socket.socket()
     listener.bind(("localhost", port))
     listener.listen()
+    print(f"Server listening on port {port}..")
     read_set.add(listener)
 
     while True:
@@ -20,7 +21,8 @@ def run_server(port):
                 read_set.add(client_socket)
                 buffers[client_socket] = b''
             else:
-                    data = read_socket.recv(1024)
+                    encoded_data = get_next_word_packet(read_socket, buffers[read_socket])
+                    data = extract_msg(encoded_data)
                     if data == b'':
                         read_socket.close()
                         read_set.remove(read_socket)
@@ -32,43 +34,18 @@ def run_server(port):
                     else:
                         data = json.loads(data)
                         match data['type']:
-                            case 'hello': ## probably can extract this into function
+                            case 'hello':
                                 names[read_socket] = data['nick']
                                 for client_socket in read_set:
                                     if client_socket != listener:
-                                        connect_msg = (f"*** {names[read_socket]} has joined the chat").encode()
+                                        connect_msg = server_json_packet('join', name=data['nick'])
                                         client_socket.sendall(connect_msg)
 
-                            case 'message':
+                            case 'chat':
                                 for client_socket in read_set:
                                     if client_socket != listener:
-                                        msg = (f"{names[read_socket]}: {data['message']}").encode()
+                                        msg = server_json_packet('chat', data['chat'], names[read_socket])
                                         client_socket.sendall(msg)
-
-
-
-
-
-
-
-# Sent to all when user joins
-# {
-#     "type": "join"
-#     "nick": "[joiner's nickname]"
-# }
-
-# Sent to all when user leaves
-# {
-#     "type": "leave"
-#     "nick": "[leaver's nickname]"
-# }
-
-# Sent to all when user sends msg
-# {
-#     "type": "chat"
-#     "nick": "[sender nickname]"
-#     "message": "[message]"
-# }
 
 
 def usage():

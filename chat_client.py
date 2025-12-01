@@ -2,26 +2,41 @@ import sys, socket, threading, json
 from chatui import init_windows, read_command, print_message, end_windows
 from packets import *
 
+MSG_LEN_SIZE = 2
 
 def usage():
     print("usage: chat_client.py name host port", file=sys.stderr)
 
 def connect_and_msg(name, host, port, s):
+    init_packet = client_json_packet('hello', name=name)
+    s.sendall(init_packet)
 
-    init_msg = json.dumps({"type": "hello", "nick": f"{name}"}).encode('utf-8')
-    s.send(init_msg)
     while True:
         cmd = read_command(f"{name}> ")
         stripped_cmd = cmd.lstrip('>')
-        msg_json = json.dumps({"type": "message", "message": f"{stripped_cmd}"}).encode()
-        s.send(msg_json)
+        packet = client_json_packet('chat', message=stripped_cmd)
+        s.sendall(packet)
 
 def receive_msgs(s):
 
     while True:
-        data = s.recv(1024)
-        decoded_data = data.decode()
-        print_message(decoded_data)
+        buffer = b''
+        encoded_data = get_next_word_packet(s, buffer)
+        data = extract_msg(encoded_data)
+        data = json.loads(data)
+        match data['type']:
+            case 'join':
+                join_msg = f"** {data['nick']} has joined the chat"
+                print_message(join_msg)
+
+            case 'chat':
+                msg = data['chat']
+                name_and_msg = f"{data['nick']}: {msg}"
+                print_message(name_and_msg)
+
+            case 'leave':
+                pass
+
 
 
 def main(argv):
