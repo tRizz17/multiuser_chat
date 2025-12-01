@@ -10,8 +10,11 @@ def connect_and_msg(name, host, port, s):
 
     init_msg = json.dumps({"type": "hello", "nick": f"{name}"}).encode('utf-8')
     s.send(init_msg)
-
-    cmd = read_command(f"{name}> ")
+    while True:
+        cmd = read_command(f"{name}> ")
+        stripped_cmd = cmd.lstrip('>')
+        msg_json = json.dumps({"type": "message", "message": f"{stripped_cmd}"}).encode()
+        s.send(msg_json)
 
 def receive_msgs(s):
 
