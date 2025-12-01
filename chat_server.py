@@ -6,6 +6,7 @@ from packets import *
 
 def run_server(port):
     buffers = {} # map sockets to buffers
+    names = {}
     read_set = set()
     listener = socket.socket()
     listener.bind(("localhost", port))
@@ -23,12 +24,12 @@ def run_server(port):
             else:
                     data = read_socket.recv(1024)
                     data = json.loads(data)
-                    
-                    if data['type'] == 'hello':
+                    if data['type'] == 'hello': ## probably can extract this into function, use switch 
+                        names[read_socket] = data['nick']
                         for client_socket in read_set:
                             if client_socket != listener:
-                                connect_msg = "** someone connected"
-                                connect_msg = connect_msg.encode()
+                                connect_msg = (f"*** {names[read_socket]} has joined the chat").encode()
+                                print(read_set)
                                 client_socket.sendall(connect_msg)
 
                     elif data['type'] == 'chat':

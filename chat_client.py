@@ -15,9 +15,10 @@ def connect_and_msg(name, host, port, s):
 
 def receive_msgs(s):
 
-    data = s.recv(1024)
-    decoded_data = data.decode()
-    print_message(decoded_data)
+    while True:
+        data = s.recv(1024)
+        decoded_data = data.decode()
+        print_message(decoded_data)
 
 
 def main(argv):
